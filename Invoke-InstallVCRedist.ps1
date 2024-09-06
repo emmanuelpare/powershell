@@ -62,6 +62,8 @@ function verifyPackage ($file, $certificate, $thumbprint, $name, $url) {
 
 ###################################################################################################################################################
 
+$osDetails = Get-CimInstance -ClassName Win32_OperatingSystem
+
 downloadFile https://aka.ms/vs/17/release/vc_redist.x86.exe "https://aka.ms and https://download.visualstudio.microsoft.com"
 verifyPackage "vc_redist.x86.exe" "Microsoft Code Signing PCA 2011" "F252E794FE438E35ACE6E53762C0A234A2C52135" "32-bit VC++ Redist" "https://download.visualstudio.microsoft.com"
 $varVCVer = ([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$varScriptDir\vc_redist.x86.exe")).ProductVersion
@@ -77,7 +79,7 @@ if ($varLastExit -eq 3010) {
     exit 0
 }
 
-if ([intptr]::Size -eq 8) {
+if ($osDetails.OsArchitecture -eq "64-bit") {
     write-host ": 64-bit device detected. Installing 64-bit redistributable binary..."
     downloadFile https://aka.ms/vs/17/release/vc_redist.x64.exe "https://aka.ms and https://download.visualstudio.microsoft.com"
     verifyPackage "vc_redist.x64.exe" "Microsoft Code Signing PCA 2011" "F252E794FE438E35ACE6E53762C0A234A2C52135" "64-bit VC++ Redist" "https://download.visualstudio.microsoft.com"
@@ -86,6 +88,19 @@ if ([intptr]::Size -eq 8) {
     write-host "- Installed vc_redist.x64.exe"
     if ($varLastExit -eq 3010) {
         write-host "- ALERT: The 64-bit Visual C++ redistributable on this device has been updated successfully."
+        write-host "  The installer has signalled that the device must be rebooted before proceeding."
+        write-host "  Please restart this system as soon as possible."
+    }
+}
+elseif ($osDetails.OsArchitecture.StartsWith("ARM")) {
+    write-host ": arm64-bit device detected. Installing 64-bit redistributable binary..."
+    downloadFile https://aka.ms/vs/17/release/vc_redist.arm64.exe "https://aka.ms and https://download.visualstudio.microsoft.com"
+    verifyPackage "vc_redist.x64.exe" "Microsoft Code Signing PCA 2011" "F252E794FE438E35ACE6E53762C0A234A2C52135" "arm64-bit VC++ Redist" "https://download.visualstudio.microsoft.com"
+    cmd /c vc_redist.arm64.exe /q /install /passive /norestart
+    $varLastExit = $LASTEXITCODE
+    write-host "- Installed vc_redist.arm64.exe"
+    if ($varLastExit -eq 3010) {
+        write-host "- ALERT: The arm4-bit Visual C++ redistributable on this device has been updated successfully."
         write-host "  The installer has signalled that the device must be rebooted before proceeding."
         write-host "  Please restart this system as soon as possible."
     }
