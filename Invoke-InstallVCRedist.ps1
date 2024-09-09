@@ -92,7 +92,7 @@ if ($osDetails.OsArchitecture -eq "64-bit") {
         write-host "  Please restart this system as soon as possible."
     }
 }
-elseif ($osDetails.OsArchitecture.StartsWith("ARM")) {
+elseif (($osDetails.OsArchitecture).StartsWith("ARM")) {
     write-host ": arm64-bit device detected. Installing 64-bit redistributable binary..."
     downloadFile https://aka.ms/vs/17/release/vc_redist.arm64.exe "https://aka.ms and https://download.visualstudio.microsoft.com"
     verifyPackage "vc_redist.x64.exe" "Microsoft Code Signing PCA 2011" "F252E794FE438E35ACE6E53762C0A234A2C52135" "arm64-bit VC++ Redist" "https://download.visualstudio.microsoft.com"
