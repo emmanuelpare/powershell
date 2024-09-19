@@ -15,7 +15,8 @@ $varScriptDir = split-path -parent $MyInvocation.MyCommand.Definition
 function downloadFile ($url, $whitelist) {
     [Net.ServicePointManager]::SecurityProtocol = [Enum]::ToObject([Net.SecurityProtocolType], 3072)
     $varFilename = $url.split('/')[-1]
-    (New-Object System.Net.WebClient).DownloadFile("$url", "$varFilename")
+    Invoke-WebRequest $url -UseBasicParsing -OutFile $varFileName
+    
     if (!(test-path $varFilename)) {
         write-host "- ERROR: File $varFilename could not be downloaded."
         write-host "  Please ensure you are whitelisting $whitelist."
